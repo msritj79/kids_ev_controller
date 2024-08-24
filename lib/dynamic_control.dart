@@ -6,7 +6,10 @@ class DynamicControlScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue,
-        title: Text('Dynamic Control'),
+        title: Text(
+          'Dynamic Control',
+          style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
+        ),
       ),
       body: Center(
         child: Column(

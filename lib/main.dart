@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:kids_ev_controller/dynamic_control.dart';
 import 'package:kids_ev_controller/body_control.dart';
+import 'package:kids_ev_controller/status_check.dart';
+import 'package:kids_ev_controller/map.dart';
 
 void main() {
   runApp(const CarControlApp());
@@ -36,6 +38,8 @@ class _CarControlHomePageState extends State<CarControlHomePage> {
   static List<Widget> _widgetOptions = <Widget>[
     DynamicControlScreen(),
     BodyControlScreen(),
+    StatusCheck(),
+    Map(),
   ];
 
   void _onItemTapped(int index) {
@@ -51,6 +55,7 @@ class _CarControlHomePageState extends State<CarControlHomePage> {
         child: _widgetOptions.elementAt(_selectedIndex),
       ),
       bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.directions_car),
@@ -59,6 +64,14 @@ class _CarControlHomePageState extends State<CarControlHomePage> {
           BottomNavigationBarItem(
             icon: Icon(Icons.lightbulb),
             label: 'Body Control',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.visibility),
+            label: 'Status Check',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.map),
+            label: 'Map',
           ),
         ],
         currentIndex: _selectedIndex,

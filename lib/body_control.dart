@@ -6,7 +6,11 @@ class BodyControlScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue,
-        title: Text('Body Control'),
+        title: Text(
+          'Body Control',
+          style: TextStyle(
+              color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
+        ),
       ),
       body: Center(
         child: Column(
