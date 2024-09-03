@@ -5,6 +5,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 // Geolocatorのパッケージをインポートする
 import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class Map extends StatelessWidget {
   @override
@@ -29,14 +30,46 @@ class MapView extends StatefulWidget {
 }
 
 class _MapViewState extends State<MapView> {
-  // マップビューの初期位置
   CameraPosition _initialLocation = CameraPosition(target: LatLng(0.0, 0.0));
-
-  // マップの表示制御用
   late GoogleMapController mapController;
+  late Position _currentPosition;
 
-  // 現在位置の記憶用
-  late Position _currentPosition; // 追加
+  @override
+  void initState() {
+    super.initState();
+    _requestPermission();
+    _getCurrentLocation();
+  }
+
+  Future<void> _requestPermission() async {
+    const permission_location = Permission.location;
+
+    print('Checking if permission is denied...');
+    if (!await permission_location.isGranted) {
+      print('Permission is denied, requesting...');
+      final result = await permission_location.request();
+      if (result.isGranted) {
+        // Permission is granted
+      } else if (result.isDenied) {
+        // Permission is denied
+      } else if (result.isPermanentlyDenied) {
+        // Permission is permanently denied
+      }
+    } else {
+      print('Permission is already granted.');
+    }
+    print('Finished checking permission.');
+  }
+
+  void _showPermissionDeniedMessage() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+            'Location permission is denied. Please enable it in settings.'),
+        duration: Duration(seconds: 3),
+      ),
+    );
+  }
 
   // 現在位置の取得方法
   void _getCurrentLocation() async {
@@ -63,14 +96,12 @@ class _MapViewState extends State<MapView> {
       });
       // await _getAddress();
     }).catchError((e) {
-      print(e);
+      print("getCurrentLocation error: $e");
+      if (e.message ==
+          "User denied permissions to access the device's location.") {
+        _showPermissionDeniedMessage();
+      }
     });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _getCurrentLocation();
   }
 
   Widget build(BuildContext context) {
@@ -167,17 +198,7 @@ class _MapViewState extends State<MapView> {
                           child: Icon(Icons.my_location),
                         ),
                         onTap: () {
-                          mapController.animateCamera(
-                            CameraUpdate.newCameraPosition(
-                              CameraPosition(
-                                target: LatLng(
-                                    35.65872865514525, // 仮の緯度。後で変更
-                                    139.74543290592266 // 仮の経度。後で変更
-                                    ),
-                                zoom: 18.0,
-                              ),
-                            ),
-                          );
+                          _getCurrentLocation();
                         },
                       ),
                     ),
