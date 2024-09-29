@@ -6,7 +6,6 @@ gradle-wrapper.jar
 /local.properties
 /local_maps.properties
 /local_openAI.properties
-*.env
 
 GeneratedPluginRegistrant.java
 
