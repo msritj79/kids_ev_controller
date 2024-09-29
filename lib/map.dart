@@ -7,30 +7,26 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-class Map extends StatelessWidget {
+class MapScreen extends StatelessWidget {
+  const MapScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.blue,
-        title: Text(
-          'Map',
-          style: TextStyle(
-              color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
-        ),
-      ),
-      body: MapView(),
-    );
+    return const MapView();
   }
 }
 
 class MapView extends StatefulWidget {
+  const MapView({super.key});
+
   @override
+  // ignore: library_private_types_in_public_api
   _MapViewState createState() => _MapViewState();
 }
 
 class _MapViewState extends State<MapView> {
-  CameraPosition _initialLocation = CameraPosition(target: LatLng(0.0, 0.0));
+  final CameraPosition _initialLocation =
+      const CameraPosition(target: LatLng(0.0, 0.0));
   late GoogleMapController mapController;
   late Position _currentPosition;
 
@@ -42,12 +38,12 @@ class _MapViewState extends State<MapView> {
   }
 
   Future<void> _requestPermission() async {
-    const permission_location = Permission.location;
+    const permissionLocation = Permission.location;
 
     print('Checking if permission is denied...');
-    if (!await permission_location.isGranted) {
+    if (!await permissionLocation.isGranted) {
       print('Permission is denied, requesting...');
-      final result = await permission_location.request();
+      final result = await permissionLocation.request();
       if (result.isGranted) {
         // Permission is granted
       } else if (result.isDenied) {
@@ -63,7 +59,7 @@ class _MapViewState extends State<MapView> {
 
   void _showPermissionDeniedMessage() {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
+      const SnackBar(
         content: Text(
             'Location permission is denied. Please enable it in settings.'),
         duration: Duration(seconds: 3),
@@ -104,6 +100,7 @@ class _MapViewState extends State<MapView> {
     });
   }
 
+  @override
   Widget build(BuildContext context) {
     // 画面の幅と高さを決定する
     var height = MediaQuery.of(context).size.height;
@@ -143,7 +140,7 @@ class _MapViewState extends State<MapView> {
                           color: Colors.blue.shade100, // ボタンを押す前のカラー
                           child: InkWell(
                             splashColor: Colors.blue, // ボタンを押した後のカラー
-                            child: SizedBox(
+                            child: const SizedBox(
                               width: 50,
                               height: 50,
                               child: Icon(Icons.add),
@@ -156,14 +153,14 @@ class _MapViewState extends State<MapView> {
                           ),
                         ),
                       ),
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       //　ズームアウトボタン
                       ClipOval(
                         child: Material(
                           color: Colors.blue.shade100, // ボタンを押す前のカラー
                           child: InkWell(
                             splashColor: Colors.blue, // ボタンを押した後のカラー
-                            child: SizedBox(
+                            child: const SizedBox(
                               width: 50,
                               height: 50,
                               child: Icon(Icons.remove),
@@ -192,7 +189,7 @@ class _MapViewState extends State<MapView> {
                       color: Colors.orange.shade100, // ボタンを押す前のカラー
                       child: InkWell(
                         splashColor: Colors.blue, // ボタンを押した後のカラー
-                        child: SizedBox(
+                        child: const SizedBox(
                           width: 50,
                           height: 50,
                           child: Icon(Icons.my_location),

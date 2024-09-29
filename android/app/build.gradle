@@ -1,10 +1,3 @@
-plugins {
-    id "com.android.application"
-    id "kotlin-android"
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
-    id "dev.flutter.flutter-gradle-plugin"
-}
-
 def mapsProperties = new Properties()
 def localMapsPropertiesFile = rootProject.file('local_maps.properties')
 if (localMapsPropertiesFile.exists()) {
@@ -25,6 +18,35 @@ if(mapsApiKey == null){
     mapsApiKey = ""
     project.logger.error('Google Maps Api Key not configured. Set it in `local_maps.properties` or in the environment variable `MAPS_API_KEY`')
 }
+
+// def openAIProperties = new Properties()
+// def localOpenAIPropertiesFile = rootProject.file('local_openAI.properties')
+// if (localOpenAIPropertiesFile.exists()) {
+//     project.logger.info('Load openAI properties from local file')
+//     localOpenAIPropertiesFile.withReader('UTF-8') { reader ->
+//         openAIProperties.load(reader)
+//     }
+// } else {
+//     project.logger.info('Load openAI properties from environment')
+//     try {
+//         openAIProperties['OPEN_AI_API_KEY'] = System.getenv('OPEN_AI_API_KEY')
+//     } catch(NullPointerException e) {
+//         project.logger.warn('Failed to load OPEN_AI_API_KEY from environment.', e)
+//     }
+// }
+// def openAIApiKey = openAIProperties.getProperty('OPEN_AI_API_KEY')
+// if(openAIApiKey == null){
+//     openAIApiKey = ""
+//     project.logger.error('OpenAI Api Key not configured. Set it in `local_openAI.properties` or in the environment variable `OPEN_AI_API_KEY`')
+// }
+
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
 
 android {
     namespace = "com.example.kids_ev_controller"
@@ -52,6 +74,7 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         manifestPlaceholders += [MAPS_API_KEY: mapsApiKey]
+        manifestPlaceholders += [OPEN_AI_API_KEY: openAIApiKey]
     }
 
     buildTypes {

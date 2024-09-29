@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:kids_ev_controller/dynamic_control.dart';
-import 'package:kids_ev_controller/body_control.dart';
-import 'package:kids_ev_controller/status_check.dart';
-import 'package:kids_ev_controller/map.dart';
+import 'dynamic_control.dart';
+import 'body_control.dart';
+import 'status_check.dart';
+import 'map.dart';
+import 'AI_chat.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
+Future<void> main() async {
+  await dotenv.load(fileName: '.env');
   runApp(const CarControlApp());
 }
 
@@ -15,31 +18,40 @@ class CarControlApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'RaspberryPi Controller',
+      title: 'Car Controller',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: CarControlHomePage(),
+      home: const TopScreen(),
     );
   }
 }
 
-class CarControlHomePage extends StatefulWidget {
-  const CarControlHomePage({super.key});
+class TopScreen extends StatefulWidget {
+  const TopScreen({super.key});
 
   @override
-  State<CarControlHomePage> createState() => _CarControlHomePageState();
+  State<TopScreen> createState() => _TopScreenState();
 }
 
-class _CarControlHomePageState extends State<CarControlHomePage> {
+class _TopScreenState extends State<TopScreen> {
   int _selectedIndex = 0;
 
-  static List<Widget> _widgetOptions = <Widget>[
+  final List<Widget> _widgetList = <Widget>[
     DynamicControlScreen(),
     BodyControlScreen(),
-    StatusCheck(),
-    Map(),
+    StatusCheckScreen(),
+    MapScreen(),
+    AIChatScreen(),
+  ];
+
+  final List<String> _titleList = <String>[
+    'Dynamic Control',
+    'Body Control',
+    'Status Check',
+    'Map',
+    'AI Chat',
   ];
 
   void _onItemTapped(int index) {
@@ -51,9 +63,15 @@ class _CarControlHomePageState extends State<CarControlHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: _widgetOptions.elementAt(_selectedIndex),
+      appBar: AppBar(
+        backgroundColor: Colors.blue,
+        title: Text(
+          _titleList.elementAt(_selectedIndex),
+          style: const TextStyle(
+              color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
+        ),
       ),
+      body: _widgetList.elementAt(_selectedIndex),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         items: const <BottomNavigationBarItem>[
@@ -72,6 +90,10 @@ class _CarControlHomePageState extends State<CarControlHomePage> {
           BottomNavigationBarItem(
             icon: Icon(Icons.map),
             label: 'Map',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.chat),
+            label: 'AI Chat',
           ),
         ],
         currentIndex: _selectedIndex,
