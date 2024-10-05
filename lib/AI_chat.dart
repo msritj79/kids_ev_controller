@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -12,14 +14,24 @@ class AIChatScreen extends StatefulWidget {
 
 class _AIChatScreenState extends State<AIChatScreen> {
   final TextEditingController _controller = TextEditingController();
-  final List<Map<String, String>> _messages = [];
+  final List<Map<String, String>> _allMessages = [];
 
   final String _apiKey = dotenv.env['OPEN_AI_API_KEY']!;
 
-  Future<void> _sendMessage(String message) async {
+  Future<void> _sendMessage(String inputMessage) async {
     setState(() {
-      _messages.add({'role': 'user', 'content': message});
+      _allMessages.add({'role': 'user', 'content': inputMessage});
     });
+
+    int maxInputConversations = 3;
+
+    List<Map<String, String>> _recentMessages = [];
+    int _startIndex = _allMessages.length > maxInputConversations * 2
+        ? _allMessages.length - 6
+        : 0;
+    for (int i = _startIndex; i < _allMessages.length; i++) {
+      _recentMessages.add(_allMessages[i]);
+    }
 
     var response = await http.post(
       Uri.parse('https://api.openai.com/v1/chat/completions'),
@@ -28,23 +40,26 @@ class _AIChatScreenState extends State<AIChatScreen> {
         'Authorization': 'Bearer $_apiKey',
       },
       body: jsonEncode({
-        'model': 'gpt-3.5-turbo', // モデルを指定
+        'model': 'gpt-4o-mini', // モデルを指定
         'messages': [
           {'role': 'system', 'content': 'You are a helpful assistant.'},
-          {'role': 'user', 'content': message},
+          ..._recentMessages,
         ],
       }),
     );
 
+    debugPrint('_recentMessages: ${_recentMessages}');
+
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
-      String reply = data['choices'][0]['message']['content'];
+      String outputMessage = data['choices'][0]['message']['content'];
+      debugPrint('API Response: ${response.body}');
       setState(() {
-        _messages.add({'role': 'assistant', 'content': reply});
+        _allMessages.add({'role': 'assistant', 'content': outputMessage});
       });
     } else {
       setState(() {
-        _messages.add(
+        _allMessages.add(
             {'role': 'assistant', 'content': 'Error: Failed to get response.'});
       });
     }
@@ -56,12 +71,12 @@ class _AIChatScreenState extends State<AIChatScreen> {
       children: [
         Expanded(
           child: ListView.builder(
-            itemCount: _messages.length,
+            itemCount: _allMessages.length,
             itemBuilder: (context, index) {
-              var message = _messages[index];
+              var message = _allMessages[index];
               return ListTile(
-                title: Text(message['content']!),
-                subtitle: Text(message['role']! == 'user' ? 'You' : 'AI'),
+                title: Text(message['role']! == 'user' ? 'You' : 'AI'),
+                subtitle: Text(message['content']!),
               );
             },
           ),
