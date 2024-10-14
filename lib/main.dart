@@ -3,12 +3,17 @@ import 'dynamic_control.dart';
 import 'body_control.dart';
 import 'status_check.dart';
 import 'map.dart';
-import 'AI_chat.dart';
+import 'ai_chat.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 Future<void> main() async {
   await dotenv.load(fileName: '.env');
-  runApp(const CarControlApp());
+  runApp(
+    const ProviderScope(
+      child: CarControlApp(),
+    ),
+  );
 }
 
 class CarControlApp extends StatelessWidget {
@@ -39,11 +44,11 @@ class _TopScreenState extends State<TopScreen> {
   int _selectedIndex = 0;
 
   final List<Widget> _widgetList = <Widget>[
-    DynamicControlScreen(),
-    BodyControlScreen(),
-    StatusCheckScreen(),
-    MapScreen(),
-    AIChatScreen(),
+    const DynamicControlScreen(),
+    const BodyControlScreen(),
+    const StatusCheckScreen(),
+    const MapScreen(),
+    const AIChatScreen(),
   ];
 
   final List<String> _titleList = <String>[

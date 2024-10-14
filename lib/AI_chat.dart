@@ -1,84 +1,34 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:kids_ev_controller/model/ai_chat_model.dart';
+import 'package:kids_ev_controller/provider/ai_chat_provider2.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class AIChatScreen extends StatefulWidget {
+class AIChatScreen extends ConsumerWidget {
   const AIChatScreen({super.key});
 
   @override
-  _AIChatScreenState createState() => _AIChatScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final aiChatState = ref.watch(aiChatProvider); // Providerを監視
+    final TextEditingController _controller = TextEditingController();
 
-class _AIChatScreenState extends State<AIChatScreen> {
-  final TextEditingController _controller = TextEditingController();
-  final List<Map<String, String>> _allMessages = [];
-
-  final String _apiKey = dotenv.env['OPEN_AI_API_KEY']!;
-
-  Future<void> _sendMessage(String inputMessage) async {
-    setState(() {
-      _allMessages.add({'role': 'user', 'content': inputMessage});
-    });
-
-    int maxInputConversations = 3;
-
-    List<Map<String, String>> _recentMessages = [];
-    int _startIndex = _allMessages.length > maxInputConversations * 2
-        ? _allMessages.length - 6
-        : 0;
-    for (int i = _startIndex; i < _allMessages.length; i++) {
-      _recentMessages.add(_allMessages[i]);
-    }
-
-    var response = await http.post(
-      Uri.parse('https://api.openai.com/v1/chat/completions'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $_apiKey',
-      },
-      body: jsonEncode({
-        'model': 'gpt-4o-mini', // モデルを指定
-        'messages': [
-          {'role': 'system', 'content': 'You are a helpful assistant.'},
-          ..._recentMessages,
-        ],
-      }),
-    );
-
-    debugPrint('_recentMessages: ${_recentMessages}');
-
-    if (response.statusCode == 200) {
-      var data = jsonDecode(response.body);
-      String outputMessage = data['choices'][0]['message']['content'];
-      debugPrint('API Response: ${response.body}');
-      setState(() {
-        _allMessages.add({'role': 'assistant', 'content': outputMessage});
-      });
-    } else {
-      setState(() {
-        _allMessages.add(
-            {'role': 'assistant', 'content': 'Error: Failed to get response.'});
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Column(
       children: [
         Expanded(
-          child: ListView.builder(
-            itemCount: _allMessages.length,
-            itemBuilder: (context, index) {
-              var message = _allMessages[index];
-              return ListTile(
-                title: Text(message['role']! == 'user' ? 'You' : 'AI'),
-                subtitle: Text(message['content']!),
+          child: aiChatState.when(
+            data: (messages) {
+              return ListView.builder(
+                itemCount: messages.length,
+                itemBuilder: (context, index) {
+                  final message = messages[index];
+                  return ListTile(
+                    title: Text(message.role! == 'user' ? 'You' : 'AI'),
+                    subtitle: Text(message.content),
+                  );
+                },
               );
             },
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, stack) => Center(child: Text('Error: $error')),
           ),
         ),
         Padding(
@@ -90,15 +40,19 @@ class _AIChatScreenState extends State<AIChatScreen> {
                   controller: _controller,
                   decoration: const InputDecoration(
                     labelText: 'Enter your message',
+                    border: OutlineInputBorder(),
                   ),
                 ),
               ),
+              const SizedBox(width: 8),
               IconButton(
                 icon: const Icon(Icons.send),
-                onPressed: () {
-                  if (_controller.text.isNotEmpty) {
-                    _sendMessage(_controller.text);
-                    _controller.clear();
+                onPressed: () async {
+                  final userMessage = _controller.text.trim();
+                  if (userMessage.isNotEmpty) {
+                    await ref.read(aiChatProvider.notifier).fetchChatCompletion(
+                        [...aiChatState.value!, Message(content: userMessage)]);
+                    _controller.clear(); // 入力フィールドをクリア
                   }
                 },
               ),
