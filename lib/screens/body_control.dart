@@ -1,30 +1,30 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:kids_ev_controller/provider/mqtt_service_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class BodyControlScreen extends StatefulWidget {
+class BodyControlScreen extends ConsumerStatefulWidget {
   const BodyControlScreen({super.key});
 
   @override
-  State<BodyControlScreen> createState() => _BodyControlScreenState();
+  ConsumerState<BodyControlScreen> createState() => _BodyControlScreenState();
 }
 
-class _BodyControlScreenState extends State<BodyControlScreen> {
+class _BodyControlScreenState extends ConsumerState<BodyControlScreen> {
   bool _isHeadlightPressed = false;
   bool _isTaillightPressed = false;
-  late BeebotteMQTTService mqttService;
 
   @override
   void initState() {
     super.initState();
-    mqttService = BeebotteMQTTService();
-    mqttService.connect(); // サーバーへの接続
   }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    ref.watch(beebotteMQTTServiceProvider);
 
     return Stack(
       alignment: Alignment.center,
@@ -72,15 +72,24 @@ class _BodyControlScreenState extends State<BodyControlScreen> {
       _isHeadlightPressed = !_isHeadlightPressed; // Toggle the state
     });
     print('Headlights toggled: $_isHeadlightPressed');
+    ref.read(beebotteMQTTServiceProvider.notifier).publish(
+        'LC500/command',
+        _isHeadlightPressed
+            ? jsonEncode({"headLight": "ON"})
+            : jsonEncode({"headLight": "OFF"}));
   }
 
-  Future<void> _toggleTaillights() async {
+  void _toggleTaillights() {
     // ヘッドライトをオン/オフする関数
     setState(() {
       _isTaillightPressed = !_isTaillightPressed; // Toggle the state
     });
     print('Taillights toggled: $_isTaillightPressed');
-    mqttService.publish('test/resource', 'test message from flutter');
+    ref.read(beebotteMQTTServiceProvider.notifier).publish(
+        'LC500/command',
+        _isTaillightPressed
+            ? jsonEncode({"tailLight": "ON"})
+            : jsonEncode({"tailLight": "OFF"}));
   }
 
   void _honkHorn() {
@@ -95,7 +104,10 @@ class _BodyControlScreenState extends State<BodyControlScreen> {
 
   @override
   void dispose() {
-    mqttService.client.disconnect(); // ウィジェットが破棄されたときにMQTTクライアントを切断
+    ref
+        .read(beebotteMQTTServiceProvider.notifier)
+        .client
+        .disconnect(); // ウィジェットが破棄されたときにMQTTクライアントを切断
     super.dispose();
   }
 }

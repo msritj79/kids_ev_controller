@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'dynamic_control.dart';
-import 'body_control.dart';
-import 'status_check.dart';
-import 'map.dart';
-import 'ai_chat.dart';
+import 'package:kids_ev_controller/provider/mqtt_service_provider.dart';
+import 'screens/dynamic_control.dart';
+import 'screens/body_control.dart';
+import 'screens/status_check.dart';
+import 'screens/map.dart';
+import 'screens/ai_chat.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -28,9 +29,24 @@ class CarControlApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const TopScreen(),
+      home: const ProviderInitializer(),
     );
   }
+}
+
+class ProviderInitializer extends ConsumerWidget {
+  const ProviderInitializer({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // プロバイダーをインスタンス化
+    ref.read(beebotteMQTTServiceProvider.notifier).connect();
+    // connectMQTT(context, ref);
+    return const TopScreen();
+  }
+
+  // Future<void> connectMQTT(BuildContext context, WidgetRef ref) async =>
+  //     ref.read(beebotteMQTTServiceProvider.notifier).connect();
 }
 
 class TopScreen extends StatefulWidget {
@@ -76,7 +92,10 @@ class _TopScreenState extends State<TopScreen> {
               color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
         ),
       ),
-      body: _widgetList.elementAt(_selectedIndex),
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _widgetList,
+      ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         items: const <BottomNavigationBarItem>[

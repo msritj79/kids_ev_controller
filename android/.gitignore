@@ -5,7 +5,6 @@ gradle-wrapper.jar
 /gradlew.bat
 /local.properties
 /local_maps.properties
-/local_openAI.properties
 
 GeneratedPluginRegistrant.java
 

@@ -19,12 +19,12 @@ class BeebotteMQTTService extends _$BeebotteMQTTService {
   final String clientId = 'seijimurata';
   final String serverUri = 'mqtt.beebotte.com';
   final int port = 1883;
-  final String token = 'token_PKz56l4BziahekNq'; // Beebotteトークン
+  final String token = 'token_p7om7dAK3ElNN7x7'; // Beebotteトークン
   late MqttServerClient client;
 
   @override
-  Future<void> build() async {
-    state = AsyncValue.data([]);
+  void build() {
+    state = const AsyncValue.data([]);
 
     client = MqttServerClient.withPort(serverUri, clientId, port);
     client.logging(on: false);
@@ -47,10 +47,9 @@ class BeebotteMQTTService extends _$BeebotteMQTTService {
     print('MQTT client connecting....');
     client.connectionMessage = connMess;
 
-    await connect();
+    // await connect();
   }
 
-  // MQTT接続
   Future<void> connect() async {
     try {
       await client.connect();
@@ -71,23 +70,12 @@ class BeebotteMQTTService extends _$BeebotteMQTTService {
     }
   }
 
+  // messageは以下のようなJson形式
+  // {"headLight": "ON", "accelerate": 5, "steering": 30, "app": "play_music"}
   void publish(String topic, String message) {
     final builder = MqttClientPayloadBuilder();
-    // final command = {
-    //   "action": "control",
-    //   "payload": {
-    //     "light": true,
-    //     "accelerate": 5,
-    //     "steering": 30,
-    //     "app": "play_music",
-    //     "": ""
-    //   }
-    // };
-    // final ccmd_json = jsonEncode(command);
-
     builder.addString(message);
-    // builder.addString(jsonEncode(command));
-    // トピックにメッセージをPublish
+    // builder.addString(jsonEncode(message));
     client.publishMessage(topic, MqttQos.atMostOnce, builder.payload!);
     print('Publishing: topic: $topic, message:$message');
   }
