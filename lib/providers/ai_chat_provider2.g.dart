@@ -6,12 +6,12 @@ part of 'ai_chat_provider2.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$aiChatHash() => r'7065c64ad2379fbdb7e30790b0a40b9465930ed6';
+String _$aiChatHash() => r'97d8c4165adda753e37568e8bba2e47d64943adc';
 
 /// See also [AiChat].
 @ProviderFor(AiChat)
 final aiChatProvider =
-    AutoDisposeAsyncNotifierProvider<AiChat, List<Message>>.internal(
+    AutoDisposeAsyncNotifierProvider<AiChat, AiChatState>.internal(
   AiChat.new,
   name: r'aiChatProvider',
   debugGetCreateSourceHash:
@@ -20,6 +20,6 @@ final aiChatProvider =
   allTransitiveDependencies: null,
 );
 
-typedef _$AiChat = AutoDisposeAsyncNotifier<List<Message>>;
+typedef _$AiChat = AutoDisposeAsyncNotifier<AiChatState>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

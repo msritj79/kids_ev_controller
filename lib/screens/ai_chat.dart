@@ -1,65 +1,50 @@
 import 'package:flutter/material.dart';
-import 'package:kids_ev_controller/model/ai_chat_model.dart';
-import 'package:kids_ev_controller/provider/ai_chat_provider2.dart';
+import 'package:kids_ev_controller/models/ai_chat_model.dart';
+import 'package:kids_ev_controller/providers/ai_chat_provider2.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kids_ev_controller/widgets/chat_item.dart';
+import 'package:kids_ev_controller/widgets/text_and_voice_field.dart';
 
 class AIChatScreen extends ConsumerWidget {
   const AIChatScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final aiChatState = ref.watch(aiChatProvider); // Providerを監視
-    final TextEditingController _controller = TextEditingController();
+    final aiChatState = ref.watch(aiChatProvider);
 
     return Column(
       children: [
         Expanded(
           child: aiChatState.when(
-            data: (messages) {
+            data: (state) {
+              final messages = state.messageList;
               return ListView.builder(
                 itemCount: messages.length,
-                itemBuilder: (context, index) {
-                  final message = messages[index];
-                  return ListTile(
-                    title: Text(message.role! == 'user' ? 'You' : 'AI'),
-                    subtitle: Text(message.content),
-                  );
-                },
+                itemBuilder: (context, index) => ChatItem(
+                    text: messages[index].content, role: messages[index].role),
               );
             },
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, stack) => Center(child: Text('Error: $error')),
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _controller,
-                  decoration: const InputDecoration(
-                    labelText: 'Enter your message',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              IconButton(
-                icon: const Icon(Icons.send),
-                onPressed: () async {
-                  final userMessage = _controller.text.trim();
-                  if (userMessage.isNotEmpty) {
-                    await ref.read(aiChatProvider.notifier).fetchChatCompletion(
-                        [...aiChatState.value!, Message(content: userMessage)]);
-                    _controller.clear(); // 入力フィールドをクリア
-                  }
-                },
-              ),
-            ],
-          ),
+        const Padding(
+          padding: EdgeInsets.all(12.0),
+          child: TextAndVoiceField(),
+        ),
+        const SizedBox(
+          height: 10,
         ),
       ],
     );
   }
 }
+//                   if (userMessage.isNotEmpty) {
+//                     await ref.read(aiChatProvider.notifier).fetchChatCompletion(
+//                         [...aiChatState.value!, Message(content: userMessage)]);
+//                     _controller.clear(); // 入力フィールドをクリア
+//                   }
+//                 },
+//               ),
+//             ],
+//           )
