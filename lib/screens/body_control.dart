@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:kids_ev_controller/provider/mqtt_service_provider.dart';
+import 'package:kids_ev_controller/providers/mqtt_service_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class BodyControlScreen extends ConsumerStatefulWidget {
@@ -24,7 +24,7 @@ class _BodyControlScreenState extends ConsumerState<BodyControlScreen> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    ref.watch(beebotteMQTTServiceProvider);
+    // ref.watch(beebotteMQTTServiceProvider);
 
     return Stack(
       alignment: Alignment.center,
@@ -38,21 +38,24 @@ class _BodyControlScreenState extends ConsumerState<BodyControlScreen> {
         HeadlightWidget(
           isPressed: _isHeadlightPressed,
           onTap: _toggleHeadlights,
-          position: const Offset(185, 425),
-          // Offset(screenWidth * 0.25, screenHeight * 0.5),
+          position:
+              // const Offset(185, 425),
+              Offset(screenWidth * 0.3, screenHeight * 0.38),
         ),
         // Right headlight
         HeadlightWidget(
           isPressed: _isHeadlightPressed,
           onTap: _toggleHeadlights,
           position:
-              const Offset(-185, 425), // Adjust based on the headlight position
+              // const Offset(-185, 425), // Adjust based on the headlight position
+              Offset(-screenWidth * 0.3, screenHeight * 0.38),
         ),
         TaillightWidget(
           isPressed: _isTaillightPressed,
           onTap: _toggleTaillights,
           position:
-              const Offset(200, 20), // Adjust based on the headlight position
+              // const Offset(200, 20), // Adjust based on the headlight position
+              Offset(screenWidth * 0.33, screenHeight * 0.05),
         ),
 
         // Right headlight
@@ -60,7 +63,8 @@ class _BodyControlScreenState extends ConsumerState<BodyControlScreen> {
           isPressed: _isTaillightPressed,
           onTap: _toggleTaillights,
           position:
-              const Offset(-200, 20), // Adjust based on the headlight position
+              // const Offset(-200, 20), // Adjust based on the headlight position
+              Offset(-screenWidth * 0.33, screenHeight * 0.05),
         ),
       ],
     );

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:kids_ev_controller/provider/mqtt_service_provider.dart';
-import 'screens/dynamic_control.dart';
+import 'package:kids_ev_controller/providers/mqtt_service_provider.dart';
+import 'screens/motion_control.dart';
 import 'screens/body_control.dart';
 import 'screens/status_check.dart';
-import 'screens/map.dart';
-import 'screens/ai_chat.dart';
+// import 'screens/map.dart';
+// import 'screens/ai_chat.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -25,10 +25,11 @@ class CarControlApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Car Controller',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
+      theme: lightTheme,
+      // theme: ThemeData(
+      //   colorScheme: const ColorScheme.light(),
+      //   // colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+      // ),
       home: const ProviderInitializer(),
     );
   }
@@ -39,14 +40,11 @@ class ProviderInitializer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // プロバイダーをインスタンス化
-    ref.read(beebotteMQTTServiceProvider.notifier).connect();
-    // connectMQTT(context, ref);
+    ref
+        .read(beebotteMQTTServiceProvider.notifier)
+        .connectAndSubscribe('LC500/command');
     return const TopScreen();
   }
-
-  // Future<void> connectMQTT(BuildContext context, WidgetRef ref) async =>
-  //     ref.read(beebotteMQTTServiceProvider.notifier).connect();
 }
 
 class TopScreen extends StatefulWidget {
@@ -60,15 +58,15 @@ class _TopScreenState extends State<TopScreen> {
   int _selectedIndex = 0;
 
   final List<Widget> _widgetList = <Widget>[
-    const DynamicControlScreen(),
+    const MotionControlScreen(),
     const BodyControlScreen(),
     const StatusCheckScreen(),
-    const MapScreen(),
-    const AIChatScreen(),
+    // const MapScreen(),
+    // const AIChatScreen(),
   ];
 
   final List<String> _titleList = <String>[
-    'Dynamic Control',
+    'Motion Control',
     'Body Control',
     'Status Check',
     'Map',
@@ -85,12 +83,25 @@ class _TopScreenState extends State<TopScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.blue,
+        // backgroundColor: Colors.blue,
         title: Text(
           _titleList.elementAt(_selectedIndex),
-          style: const TextStyle(
-              color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
+          style: TextStyle(
+              color: Theme.of(context).colorScheme.onPrimary,
+              fontSize: 28,
+              fontWeight: FontWeight.bold),
         ),
+        elevation: 3, // 影をさらに強調
+        shadowColor: Colors.black,
+        // flexibleSpace: Container(
+        //   decoration: BoxDecoration(
+        //     gradient: LinearGradient(
+        //       colors: [Colors.blueAccent, Colors.lightBlue],
+        //       begin: Alignment.topCenter,
+        //       end: Alignment.bottomCenter,
+        //     ),
+        //   ),
+        // )
       ),
       body: IndexedStack(
         index: _selectedIndex,
@@ -101,7 +112,7 @@ class _TopScreenState extends State<TopScreen> {
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.directions_car),
-            label: 'Dynamic Control',
+            label: 'Motion Control',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.lightbulb),
@@ -127,3 +138,13 @@ class _TopScreenState extends State<TopScreen> {
     );
   }
 }
+
+final lightTheme = ThemeData(
+  colorScheme: ThemeData.light().colorScheme.copyWith(
+        primary: Colors.white,
+        onPrimary: Colors.black,
+        secondary: Colors.deepOrange,
+        onSecondary: Colors.white,
+      ),
+  // useMaterial3: true,
+);

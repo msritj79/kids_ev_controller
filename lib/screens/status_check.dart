@@ -1,54 +1,99 @@
-import 'package:flutter/material.dart';
+import 'dart:convert';
 
-class StatusCheckScreen extends StatelessWidget {
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kids_ev_controller/providers/mqtt_service_provider.dart';
+
+class StatusCheckScreen extends ConsumerStatefulWidget {
   const StatusCheckScreen({super.key});
 
   @override
+  ConsumerState<StatusCheckScreen> createState() => _StatusCheckScreenState();
+}
+
+class _StatusCheckScreenState extends ConsumerState<StatusCheckScreen> {
+  String doorStatus = 'Closed';
+  String doorLock = 'Unlocked';
+  String windowsStatus = 'Closed';
+  String headlightsStatus = 'OFF';
+  String taillightsStatus = 'OFF';
+  String hazardLightsStatus = 'OFF';
+  String updateDateTime = 'Last updated: Never';
+
+  @override
+  void initState() {
+    super.initState();
+
+    // MQTTのトピックにサブスクライブ
+    // ref.read(beebotteMQTTServiceProvider.notifier).connect();
+    // ref.read(beebotteMQTTServiceProvider.notifier).subscribe('LC500/command');
+    // ref.read(beebotteMQTTServiceProvider.notifier).subscribe('LC500/status');
+  }
+
+  void updateState() {
+    // MQTTの状態を監視
+    ref.listen<AsyncValue<List<MqttState>>>(beebotteMQTTServiceProvider,
+        (previous, next) {
+      next.whenData((messages) {
+        for (var message in messages) {
+          var payload = jsonDecode(message.payload);
+
+          setState(() {
+            if (payload['doorStatus'] != null) {
+              doorStatus = payload['doorStatus'];
+            }
+            if (payload['doorLock'] != null) {
+              doorLock = payload['doorLock'];
+            }
+            if (payload['windows'] != null) {
+              windowsStatus = payload['windows'];
+            }
+            if (payload['headLight'] != null) {
+              headlightsStatus = payload['headLight'];
+            }
+            if (payload['tailLight'] != null) {
+              taillightsStatus = payload['tailLight'];
+            }
+            if (payload['hazardLight'] != null) {
+              hazardLightsStatus = payload['hazardLight'];
+            }
+            updateDateTime = 'Last updated: ${DateTime.now()}';
+          });
+        }
+      });
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    updateState();
+
     return ListView(
       padding: const EdgeInsets.all(16.0),
-      children: const [
-        // Date & Time
+      children: [
+        // 更新日時
         Text(
-          '更新日時 2024年09月01日 12:00',
-          style: TextStyle(color: Colors.grey),
+          updateDateTime,
+          style: const TextStyle(color: Colors.grey),
         ),
 
-        // Door Section
-        SectionTitle(title: 'Doors'),
-        StatusRow(
-          label: 'Door Status',
-          status: 'Closed',
-        ),
-        StatusRow(
-          label: 'Door Lock',
-          status: 'Unlocked',
-        ),
+        // ドアセクション
+        const SectionTitle(title: 'Doors'),
+        StatusRow(label: 'Door Status', status: doorStatus),
+        StatusRow(label: 'Door Lock', status: doorLock),
 
-        // Window Section
-        SectionTitle(title: 'Windows'),
-        StatusRow(
-          label: 'Windows',
-          status: 'Closed',
-        ),
+        // ウィンドウセクション
+        const SectionTitle(title: 'Windows'),
+        StatusRow(label: 'Windows', status: windowsStatus),
 
-        // Lamp Section
-        SectionTitle(title: 'Lights'),
-        StatusRow(
-          label: 'Headlights',
-          status: 'OFF',
-        ),
-        StatusRow(
-          label: 'Taillights',
-          status: 'OFF',
-        ),
-        StatusRow(
-          label: 'Hazard Lights',
-          status: 'OFF',
-        ),
+        // ライトセクション
+        const SectionTitle(title: 'Lights'),
+        StatusRow(label: 'Headlights', status: headlightsStatus),
+        StatusRow(label: 'Taillights', status: taillightsStatus),
+        StatusRow(label: 'Hazard Lights', status: hazardLightsStatus),
 
-        // Additional Sections
-        SectionTitle(title: 'Other'),
+        // その他
+        const SectionTitle(title: 'Other'),
       ],
     );
   }
@@ -101,16 +146,16 @@ class StatusRow extends StatelessWidget {
               ),
               Text(
                 status,
-                style: const TextStyle(
-                  color: Colors.black54,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onPrimary,
                   fontSize: 16.0,
                 ),
               ),
             ],
           ),
           const Divider(
-            color: Colors.grey, // 線の色を灰色に設定
-            thickness: 1.0, // 線の太さを設定
+            color: Colors.grey,
+            thickness: 1.0,
           ),
         ],
       ),
